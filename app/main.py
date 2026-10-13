@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
+from app.core.config import settings
+
 app = FastAPI(
-    title="monitoring-platform",
+    title=settings.app_name,
     version="0.1.0",
     description="Платформа для мониторинга статуса внешних сервисов",
 )
