@@ -26,8 +26,13 @@ async def auth_error_handler(request: Request, exc: Exception) -> JSONResponse:
         return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
     status_code = _AUTH_ERROR_STATUS.get(type(exc), 500)
+    headers = {"WWW-Authenticate": "Bearer"} if status_code == 401 else {}
 
-    return JSONResponse(status_code=status_code, content={"detail": str(exc)})
+    return JSONResponse(
+        status_code=status_code,
+        content={"detail": str(exc)},
+        headers=headers,
+    )
 
 
 def register_auth_exception_handlers(app: FastAPI) -> None:

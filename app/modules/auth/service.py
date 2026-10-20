@@ -1,9 +1,5 @@
-from typing import Annotated
-
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import DBSessionDep
 from app.core.security import create_access_token, hash_password, verify_password
 from app.modules.auth.exceptions import (
     EmailAlreadyExistsError,
@@ -58,12 +54,3 @@ class AuthService:
             raise InactiveUserError("Пользователь не активен.")
 
         return create_access_token(user.id)
-
-
-def get_auth_service(session: DBSessionDep) -> AuthService:
-    """Создаёт AuthService с переданной сессией."""
-
-    return AuthService(session)
-
-
-AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

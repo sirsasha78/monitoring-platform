@@ -1,10 +1,6 @@
-from typing import Annotated
-
-from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import DBSessionDep
 from app.modules.auth.models import User
 
 
@@ -60,12 +56,3 @@ class UserRepository:
         await self._session.flush()
 
         return user
-
-
-def get_user_repository(session: DBSessionDep) -> UserRepository:
-    """Создаёт репозиторий пользователей с переданной сессией."""
-
-    return UserRepository(session)
-
-
-UserRepositoryDep = Annotated[UserRepository, Depends(get_user_repository)]

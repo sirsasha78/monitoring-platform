@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
+from app.modules.auth.dependencies import AuthServiceDep, CurrentUserDep
+from app.modules.auth.models import User
 from app.modules.auth.schemas import Token, UserRead, UserRegister
-from app.modules.auth.service import AuthServiceDep
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -27,3 +28,10 @@ async def login(
 
     access_token = await service.login(form.username, form.password)
     return Token(access_token=access_token)
+
+
+@router.get("/me", response_model=UserRead)
+async def me(current_user: CurrentUserDep) -> User:
+    """Возвращает текущего пользователя"""
+
+    return current_user
