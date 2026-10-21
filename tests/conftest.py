@@ -28,13 +28,21 @@ async def setup_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
+@pytest.fixture(autouse=True)
+async def _clean_db() -> AsyncIterator[None]:
+    """Очищает таблицы перед каждым тестом для изоляции."""
+
+    async with test_session_factory() as session:
+        await session.execute(text("TRUNCATE users RESTART IDENTITY CASCADE"))
+        await session.commit()
+    yield
+
+
 @pytest.fixture
 async def db_session() -> AsyncIterator[AsyncSession]:
     """Сессия для прямого доступа к тестовой БД с очисткой перед тестом."""
 
     async with test_session_factory() as session:
-        await session.execute(text("TRUNCATE users RESTART IDENTITY CASCADE"))
-        await session.commit()
         yield session
 
 
@@ -56,3 +64,23 @@ async def client() -> AsyncIterator[AsyncClient]:
             yield c
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def user_data() -> dict[str, str]:
+    """Валидные данные для регистрации нового пользователя."""
+
+    return {
+        "username": "alice_92",
+        "email": "alice@example.com",
+        "password": "secret123",
+    }
+
+
+@pytest.fixture
+async def registered_user(client: AsyncClient, user_data: dict[str, str]) -> dict[str, str]:
+    """Создаёт пользователя через API. Возвращает user_data + id."""
+
+    response = await client.post("/auth/register", json=user_data)
+    assert response.status_code == 201
+    return {**user_data, "id": response.json()["id"]}
