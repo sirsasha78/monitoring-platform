@@ -21,6 +21,9 @@ dependencies = [
 dev = [
     "ruff>=0.16.5",
     "mypy>=1.13.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "httpx>=0.28.1",
 ]
 
 [tool.ruff]
@@ -69,3 +72,8 @@ warn_required_dynamic_aliases = true
 [[tool.mypy.overrides]]
 module = "migrations.*"
 ignore_errors = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+testpaths = ["tests"]
