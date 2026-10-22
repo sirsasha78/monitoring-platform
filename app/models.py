@@ -5,5 +5,6 @@ Alembic через env.py импортирует только этот файл 
 """
 
 from app.modules.auth.models import User
+from app.modules.monitoring.models import Service
 
-__all__ = ["User"]
+__all__ = ["Service", "User"]

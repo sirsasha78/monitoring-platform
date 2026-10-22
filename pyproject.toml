@@ -59,6 +59,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 
+[tool.ruff.lint.per-file-ignores]
+"app/modules/**/models.py" = ["UP037"]
+
 [tool.mypy]
 python_version = "3.14"
 strict = true
