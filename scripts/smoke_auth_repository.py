@@ -1,11 +1,12 @@
 """Smoke-тест для UserRepository.
 
-Запуск: uv run python scripts/smoke_repository.py
+Запуск: uv run python -m scripts.smoke_auth_repository
 """
 
 import asyncio
 
 from app.core.database import SessionLocal
+from app.models import *  # noqa: F403
 from app.modules.auth.models import User
 from app.modules.auth.repository import UserRepository
 
