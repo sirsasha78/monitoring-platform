@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.core.dependencies import DBSessionDep
 from app.modules.auth.handlers import register_auth_exception_handlers
 from app.modules.auth.router import router as auth_router
+from app.modules.monitoring.handlers import register_monitoring_exception_handlers
 
 app = FastAPI(
     title=settings.app_name,
@@ -14,6 +15,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 register_auth_exception_handlers(app)
+register_monitoring_exception_handlers(app)
 
 
 @app.get("/health")
