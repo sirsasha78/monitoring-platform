@@ -6,6 +6,7 @@ from app.core.dependencies import DBSessionDep
 from app.modules.auth.handlers import register_auth_exception_handlers
 from app.modules.auth.router import router as auth_router
 from app.modules.monitoring.handlers import register_monitoring_exception_handlers
+from app.modules.monitoring.router import router as monitoring_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -14,6 +15,8 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(monitoring_router)
+
 register_auth_exception_handlers(app)
 register_monitoring_exception_handlers(app)
 

@@ -29,12 +29,12 @@ class MonitoringService:
         return service
 
     async def list_for_user(self, user_id: int) -> list[Service]:
-        """Получение всех сервисов текущего пользователя."""
+        """Возвращает все сервисы пользователя (включая на паузе), новые сверху."""
 
         return await self._repo.list_by_user_id(user_id)
 
     async def get_for_user(self, user_id: int, service_id: int) -> Service:
-        """Возвращает все сервисы пользователя (включая на паузе), новые сверху."""
+        """Возвращает сервис по ID."""
 
         service = await self._repo.get_by_id(service_id)
 
