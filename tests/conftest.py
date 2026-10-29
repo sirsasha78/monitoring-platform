@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.core.config import settings
 from app.core.database import Base
 from app.core.dependencies import get_db_session
+from app.core.security import create_access_token
 from app.main import app
 from app.models import *  # noqa: F403
 
@@ -33,7 +34,7 @@ async def _clean_db() -> AsyncIterator[None]:
     """Очищает таблицы перед каждым тестом для изоляции."""
 
     async with test_session_factory() as session:
-        await session.execute(text("TRUNCATE users RESTART IDENTITY CASCADE"))
+        await session.execute(text("TRUNCATE users, services RESTART IDENTITY CASCADE"))
         await session.commit()
     yield
 
@@ -84,3 +85,46 @@ async def registered_user(client: AsyncClient, user_data: dict[str, str]) -> dic
     response = await client.post("/auth/register", json=user_data)
     assert response.status_code == 201
     return {**user_data, "id": response.json()["id"]}
+
+
+@pytest.fixture
+async def auth_token(registered_user: dict[str, str]) -> str:
+    """Создает access token для registered_user."""
+
+    return create_access_token(registered_user["id"])
+
+
+@pytest.fixture
+def auth_headers(auth_token: str) -> dict[str, str]:
+    """Добавляет заголовки."""
+
+    return {"Authorization": f"Bearer {auth_token}"}
+
+
+@pytest.fixture
+async def second_user(client: AsyncClient) -> dict[str, str]:
+    """Создает второго пользователя для тестирования."""
+
+    data = {"username": "smoke_bob", "email": "bob@smoke.com", "password": "secret123"}
+    response = await client.post("/auth/register", json=data)
+    assert response.status_code == 201
+    return {**data, "id": response.json()["id"]}
+
+
+@pytest.fixture
+async def second_user_headers(second_user: dict[str, str]) -> dict[str, str]:
+    """Добавляет заголовок второму пользователю."""
+
+    token = create_access_token(second_user["id"])
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def service_data() -> dict[str, object]:
+    """Валидные данные для создания нового сервиса."""
+
+    return {
+        "name": "Stripe",
+        "url": "https://api.stripe.com/health",
+        "interval_seconds": 30,
+    }
