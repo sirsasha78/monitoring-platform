@@ -34,7 +34,9 @@ async def _clean_db() -> AsyncIterator[None]:
     """Очищает таблицы перед каждым тестом для изоляции."""
 
     async with test_session_factory() as session:
-        await session.execute(text("TRUNCATE users, services RESTART IDENTITY CASCADE"))
+        await session.execute(
+            text("TRUNCATE users, services, check_results RESTART IDENTITY CASCADE")
+        )
         await session.commit()
     yield
 
