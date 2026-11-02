@@ -1,4 +1,6 @@
-"""Smoke-тест для AuthService."""
+"""Smoke-тест для AuthService.
+Запуск: uv run python -m scripts.smoke_auth_repository
+"""
 
 import asyncio
 
