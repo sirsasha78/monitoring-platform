@@ -11,6 +11,7 @@ from app.core.dependencies import get_db_session
 from app.core.security import create_access_token
 from app.main import app
 from app.models import *  # noqa: F403
+from app.modules.monitoring.models import Service
 
 TEST_DATABASE_URL = (
     f"postgresql+asyncpg://{settings.postgres_user}:{settings.postgres_password}"
@@ -130,3 +131,17 @@ def service_data() -> dict[str, object]:
         "url": "https://api.stripe.com/health",
         "interval_seconds": 30,
     }
+
+
+@pytest.fixture
+def service() -> Service:
+    """Тестовый сервис без БД."""
+
+    return Service(
+        id=1,
+        user_id=1,
+        name="test",
+        url="https://example.com",
+        method="GET",
+        timeout_seconds=10,
+    )
