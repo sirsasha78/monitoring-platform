@@ -1,13 +1,15 @@
 from typing import Annotated
 
+import httpx
 from fastapi import Depends
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import DBSessionDep
+from app.modules.monitoring.checker import check_service
 from app.modules.monitoring.exceptions import ServiceNotFoundError
-from app.modules.monitoring.models import Service
-from app.modules.monitoring.repository import ServiceRepository
+from app.modules.monitoring.models import CheckResult, Service
+from app.modules.monitoring.repository import CheckResultRepository, ServiceRepository
 from app.modules.monitoring.schemas import ServiceCreate, ServiceUpdate
 
 
@@ -17,6 +19,7 @@ class MonitoringService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._repo = ServiceRepository(session)
+        self._check_repo = CheckResultRepository(session)
 
     async def create(self, user_id: int, data: ServiceCreate) -> Service:
         """Создает новый сервис."""
@@ -57,6 +60,27 @@ class MonitoringService:
         await self._session.refresh(service)
 
         return service
+
+    async def run_check(
+        self, service_id: int, client: httpx.AsyncClient | None = None
+    ) -> CheckResult | None:
+        """Метод для оркестрации проверки."""
+
+        service = await self._repo.get_by_id(service_id)
+
+        if service is None:
+            return None
+        if not service.is_active:
+            return None
+
+        check_result = await check_service(service, client)
+        await self._check_repo.add(check_result)
+
+        service.current_status = check_result.status
+        service.last_check_at = check_result.checked_at
+        await self._session.commit()
+
+        return check_result
 
     async def delete(self, user_id: int, service_id: int) -> None:
         """Удаляет сервис."""

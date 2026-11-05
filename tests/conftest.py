@@ -1,6 +1,7 @@
 from collections.abc import AsyncIterator
 
 import pytest
+import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import NullPool, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -22,7 +23,7 @@ test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 test_session_factory = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_db() -> None:
     """Создаёт все таблицы в тестовой БД перед сессией тестов."""
 
@@ -30,7 +31,7 @@ async def setup_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def _clean_db() -> AsyncIterator[None]:
     """Очищает таблицы перед каждым тестом для изоляции."""
 
@@ -42,7 +43,7 @@ async def _clean_db() -> AsyncIterator[None]:
     yield
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_session() -> AsyncIterator[AsyncSession]:
     """Сессия для прямого доступа к тестовой БД с очисткой перед тестом."""
 
@@ -57,7 +58,7 @@ async def _override_get_db_session() -> AsyncIterator[AsyncSession]:
         yield session
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def client() -> AsyncIterator[AsyncClient]:
     """HTTP-клиент с подменённой БД."""
 
@@ -81,7 +82,7 @@ def user_data() -> dict[str, str]:
     }
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def registered_user(client: AsyncClient, user_data: dict[str, str]) -> dict[str, str]:
     """Создаёт пользователя через API. Возвращает user_data + id."""
 
@@ -90,7 +91,7 @@ async def registered_user(client: AsyncClient, user_data: dict[str, str]) -> dic
     return {**user_data, "id": response.json()["id"]}
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def auth_token(registered_user: dict[str, str]) -> str:
     """Создает access token для registered_user."""
 
@@ -104,7 +105,7 @@ def auth_headers(auth_token: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {auth_token}"}
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def second_user(client: AsyncClient) -> dict[str, str]:
     """Создает второго пользователя для тестирования."""
 
@@ -114,7 +115,7 @@ async def second_user(client: AsyncClient) -> dict[str, str]:
     return {**data, "id": response.json()["id"]}
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def second_user_headers(second_user: dict[str, str]) -> dict[str, str]:
     """Добавляет заголовок второму пользователю."""
 
