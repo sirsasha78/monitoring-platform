@@ -7,3 +7,7 @@ services:
     ports:
       - "${RABBITMQ_PORT}:5672"
       - "${RABBITMQ_MGMT_PORT}:15672"
+
+  redis:
+    ports:
+      - "${REDIS_PORT}:6379"
