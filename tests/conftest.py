@@ -12,6 +12,7 @@ from app.core.dependencies import get_db_session
 from app.core.security import create_access_token
 from app.main import app
 from app.models import *  # noqa: F403
+from app.modules.auth.models import User
 from app.modules.monitoring.models import Service
 
 TEST_DATABASE_URL = (
@@ -146,3 +147,13 @@ def service() -> Service:
         method="GET",
         timeout_seconds=10,
     )
+
+
+@pytest_asyncio.fixture
+async def user_for_services(db_session: AsyncSession) -> User:
+    """Создает пользователя для сервиса."""
+
+    user = User(username="smoke_due", email="due@smoke.test", password_hash="fake")
+    db_session.add(user)
+    await db_session.flush()
+    return user

@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.monitoring.models import CheckResult, Service
@@ -23,6 +23,29 @@ class ServiceRepository:
         result = await self._session.scalars(
             select(Service).where(Service.user_id == user_id).order_by(Service.created_at.desc())
         )
+
+        return list(result.all())
+
+    async def list_due_for_check(self, limit: int = 100) -> list[Service]:
+        """Метод для получения сервисов для проверки."""
+
+        stmt = (
+            select(Service)
+            .where(
+                Service.is_active.is_(True),
+                (
+                    Service.last_check_at.is_(None)
+                    | (
+                        Service.last_check_at
+                        + func.make_interval(0, 0, 0, 0, 0, 0, Service.interval_seconds)
+                        <= func.now()
+                    )
+                ),
+            )
+            .order_by(Service.last_check_at.nulls_first())
+            .limit(limit)
+        )
+        result = await self._session.scalars(stmt)
 
         return list(result.all())
 
