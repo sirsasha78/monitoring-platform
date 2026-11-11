@@ -19,6 +19,7 @@ class Settings(BaseSettings):
         "INFO",
         "DEBUG",
     ] = "DEBUG"
+
     postgres_user: str
     postgres_password: str
     postgres_db: str
@@ -32,6 +33,10 @@ class Settings(BaseSettings):
     redis_host: str = "localhost"
     redis_port: int = 6379
     redis_db: int = 0
+
+    scheduler_batch_size: int = 100
+    scheduler_sleep_seconds: int = 5
+    scheduler_lock_ttl: int = 60
 
     @property
     def database_url(self) -> str:
