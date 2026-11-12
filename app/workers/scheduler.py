@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.models import *  # noqa: F403
+from app.modules.incidents.service import IncidentService
 from app.modules.monitoring.repository import ServiceRepository
 from app.modules.monitoring.service import MonitoringService
 
@@ -34,13 +35,18 @@ async def run_iteration(session: AsyncSession, client: httpx.AsyncClient | None 
 
     repo = ServiceRepository(session)
     monitoring = MonitoringService(session)
+    incident_service = IncidentService(session)
     services = await repo.list_due_for_check(limit=settings.scheduler_batch_size)
     checked = 0
 
     for service in services:
         try:
-            await monitoring.run_check(service.id, client=client)
+            check_result = await monitoring.run_check(service.id, client=client)
+            if check_result is None:
+                continue
+
             checked += 1
+            await incident_service.process_check(service, check_result)
         except Exception:
             logger.exception("Ошибка проверки сервиса service_id=%s", service.id)
 
