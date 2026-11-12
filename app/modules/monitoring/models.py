@@ -10,6 +10,7 @@ from app.modules.monitoring.enums import CheckStatus, ErrorType
 
 if TYPE_CHECKING:
     from app.modules.auth.models import User
+    from app.modules.incidents.models import Incident
 
 
 class Service(Base):
@@ -43,10 +44,15 @@ class Service(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    consecutive_failures: Mapped[int] = mapped_column(server_default=text("0"))
+    consecutive_successes: Mapped[int] = mapped_column(server_default=text("0"))
 
     user: Mapped["User"] = relationship("User", back_populates="services")
     check_results: Mapped[list["CheckResult"]] = relationship(
         "CheckResult", back_populates="service", cascade="all, delete-orphan"
+    )
+    incidents: Mapped[list["Incident"]] = relationship(
+        "Incident", back_populates="service", cascade="all, delete-orphan"
     )
 
     def __repr__(self) -> str:

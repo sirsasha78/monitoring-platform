@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     scheduler_sleep_seconds: int = 5
     scheduler_lock_ttl: int = 60
 
+    incident_min_duration_seconds: int = 300
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

@@ -29,6 +29,7 @@ async def setup_db() -> None:
     """Создаёт все таблицы в тестовой БД перед сессией тестов."""
 
     async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
 
@@ -38,7 +39,7 @@ async def _clean_db() -> AsyncIterator[None]:
 
     async with test_session_factory() as session:
         await session.execute(
-            text("TRUNCATE users, services, check_results RESTART IDENTITY CASCADE")
+            text("TRUNCATE users, services, check_results, incidents RESTART IDENTITY CASCADE")
         )
         await session.commit()
     yield
