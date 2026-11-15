@@ -47,9 +47,11 @@ class IncidentService:
             await self._repo.add(incident)
             service.consecutive_failures = 0
             result = incident
+
         elif open_incident is not None:
             if service.consecutive_successes >= service.recovery_threshold:
                 min_duration = timedelta(seconds=settings.incident_min_duration_seconds)
+
                 if check_result.checked_at - open_incident.started_at >= min_duration:
                     open_incident.resolved_at = check_result.checked_at
                     open_incident.status = IncidentStatus.RESOLVED
