@@ -3,10 +3,10 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.core.dependencies import DBSessionDep
-from app.models import *  # noqa: F403
 from app.modules.auth.handlers import register_auth_exception_handlers
 from app.modules.auth.router import router as auth_router
 from app.modules.incidents.handlers import register_incidents_exception_handlers
+from app.modules.incidents.router import router as incidents_router
 from app.modules.monitoring.handlers import register_monitoring_exception_handlers
 from app.modules.monitoring.router import router as monitoring_router
 
@@ -18,6 +18,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(monitoring_router)
+app.include_router(incidents_router)
 
 register_auth_exception_handlers(app)
 register_monitoring_exception_handlers(app)

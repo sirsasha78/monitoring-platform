@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.dependencies import DBSessionDep
 from app.modules.incidents.enums import IncidentStatus
+from app.modules.incidents.exceptions import IncidentNotFoundError
 from app.modules.incidents.models import Incident
 from app.modules.incidents.repository import IncidentRepository
 from app.modules.monitoring.enums import CheckStatus
@@ -60,6 +61,34 @@ class IncidentService:
         await self._session.commit()
 
         return result
+
+    async def list_by_user_id(
+        self, user_id: int, limit: int = 50, offset: int = 0, status: IncidentStatus | None = None
+    ) -> list[Incident]:
+        """Все инциденты пользователя (новые сверху). Опциональный фильтр по status."""
+
+        return await self._repo.list_by_user_id(user_id, limit, offset, status)
+
+    async def list_by_service_id(
+        self,
+        service_id: int,
+        limit: int = 50,
+        offset: int = 0,
+        status: IncidentStatus | None = None,
+    ) -> list[Incident]:
+        """История инцидентов сервиса (новые сверху). Владелец проверяется в роутере."""
+
+        return await self._repo.list_by_service_id(service_id, limit, offset, status)
+
+    async def get_for_user(self, user_id: int, incident_id: int) -> Incident:
+        """Инцидент пользователя по id. Raises IncidentNotFoundError если нет или чужой."""
+
+        incident = await self._repo.get_for_user(user_id, incident_id)
+
+        if incident is None:
+            raise IncidentNotFoundError("Инцидент не найден.")
+
+        return incident
 
 
 def get_incident_service(session: DBSessionDep) -> IncidentService:

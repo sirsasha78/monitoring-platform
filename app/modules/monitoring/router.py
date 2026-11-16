@@ -1,6 +1,11 @@
 from fastapi import APIRouter, status
 
+from app.core.pagination import PaginationDep
 from app.modules.auth.dependencies import CurrentUserDep
+from app.modules.incidents.enums import IncidentStatus
+from app.modules.incidents.models import Incident
+from app.modules.incidents.schemas import IncidentRead
+from app.modules.incidents.service import IncidentServiceDep
 from app.modules.monitoring.schemas import ServiceCreate, ServiceRead, ServiceUpdate
 from app.modules.monitoring.service import MonitoringServiceDep
 
@@ -27,6 +32,24 @@ async def get_services_for_user(
     services = await service_dep.list_for_user(current_user.id)
 
     return [ServiceRead.model_validate(s) for s in services]
+
+
+@router.get("/{service_id}/incidents", response_model=list[IncidentRead])
+async def get_service_incidents(
+    service_id: int,
+    current_user: CurrentUserDep,
+    monitoring: MonitoringServiceDep,
+    incident_service: IncidentServiceDep,
+    pagination: PaginationDep,
+    status: IncidentStatus | None = None,
+) -> list[Incident]:
+    """История инцидентов сервиса. Только своего, иначе 404."""
+
+    await monitoring.get_for_user(current_user.id, service_id)
+
+    return await incident_service.list_by_service_id(
+        service_id, pagination.limit, pagination.offset, status
+    )
 
 
 @router.get("/{service_id}", response_model=ServiceRead)
