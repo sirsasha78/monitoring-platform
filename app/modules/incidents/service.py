@@ -12,6 +12,7 @@ from app.modules.incidents.models import Incident
 from app.modules.incidents.repository import IncidentRepository
 from app.modules.monitoring.enums import CheckStatus
 from app.modules.monitoring.models import CheckResult, Service
+from app.modules.notifications.service import OutboxService
 
 
 class IncidentService:
@@ -20,6 +21,7 @@ class IncidentService:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
         self._repo = IncidentRepository(session)
+        self._outbox = OutboxService(session)
 
     async def process_check(self, service: Service, check_result: CheckResult) -> Incident | None:
         """Обновляет счётчики, открывает/закрывает инцидент по порогам.
@@ -57,6 +59,12 @@ class IncidentService:
                     open_incident.resolved_at = check_result.checked_at
                     open_incident.status = IncidentStatus.RESOLVED
                     result = open_incident
+
+        if result is not None:
+            event_type = (
+                "incident.opened" if result.status == IncidentStatus.OPEN else "incident.resolved"
+            )
+            await self._outbox.publish_incident_event(event_type, result)
 
         await self._session.commit()
 
