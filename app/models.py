@@ -7,5 +7,6 @@ Alembic через env.py импортирует только этот файл 
 from app.modules.auth.models import User
 from app.modules.incidents.models import Incident
 from app.modules.monitoring.models import CheckResult, Service
+from app.modules.notifications.models import Notification, OutboxMessage
 
-__all__ = ["CheckResult", "Incident", "Service", "User"]
+__all__ = ["CheckResult", "Incident", "Notification", "OutboxMessage", "Service", "User"]

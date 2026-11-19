@@ -11,6 +11,7 @@ from app.modules.monitoring.enums import ErrorType
 
 if TYPE_CHECKING:
     from app.modules.monitoring.models import Service
+    from app.modules.notifications.models import Notification
 
 
 class Incident(Base):
@@ -56,6 +57,9 @@ class Incident(Base):
     )
 
     service: Mapped["Service"] = relationship("Service", back_populates="incidents")
+    notifications: Mapped[list["Notification"]] = relationship(
+        "Notification", back_populates="incident", cascade="all, delete-orphan"
+    )
 
     def __repr__(self) -> str:
         return f"<Incident(id={self.id}, service_id={self.service_id}, status={self.status})>"
