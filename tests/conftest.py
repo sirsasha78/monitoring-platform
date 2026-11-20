@@ -40,7 +40,8 @@ async def _clean_db() -> AsyncIterator[None]:
     async with test_session_factory() as session:
         await session.execute(
             text(
-                "TRUNCATE users, services, check_results, incidents, outbox_messages, notifications RESTART IDENTITY CASCADE"
+                "TRUNCATE users, services, check_results, incidents, outbox_messages, "
+                "notifications RESTART IDENTITY CASCADE"
             )
         )
         await session.commit()
