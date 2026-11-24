@@ -40,6 +40,16 @@ class Settings(BaseSettings):
 
     incident_min_duration_seconds: int = 300
 
+    rabbitmq_exchange: str = "notifications"
+    rabbitmq_user: str
+    rabbitmq_password: str
+    rabbitmq_host: str
+    rabbitmq_port: int
+
+    outbox_publisher_batch_size: int = 100
+    outbox_publisher_sleep_seconds: int = 5
+    outbox_publisher_lock_ttl: int = 60
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
@@ -47,6 +57,10 @@ class Settings(BaseSettings):
     @property
     def redis_url(self) -> str:
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+
+    @property
+    def rabbitmq_url(self) -> str:
+        return f"amqp://{self.rabbitmq_user}:{self.rabbitmq_password}@{self.rabbitmq_host}:{self.rabbitmq_port}/"
 
 
 settings = Settings()  # pyright: ignore[reportCallIssue]

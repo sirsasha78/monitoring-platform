@@ -16,6 +16,7 @@ dependencies = [
     "pyjwt>=2.15.1",
     "python-multipart>=0.0.32",
     "redis[hiredis]>=8.1.0",
+    "aio-pika>=10.2.3",
 ]
 
 [dependency-groups]
