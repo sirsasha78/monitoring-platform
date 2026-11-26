@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Инцидент закрыт</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #090; border-bottom: 2px solid #090; padding-bottom: 8px;">
+    ✅ Сервис восстановлен
+  </h2>
+
+  <p>Сервис <strong>{{ service.name }}</strong> снова доступен.</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+    <tr>
+      <td style="padding: 6px 0; color: #666; width: 40%;">Сервис</td>
+      <td style="padding: 6px 0;"><strong>{{ service.name }}</strong></td>
+    </tr>
+    <tr>
+      <td style="padding: 6px 0; color: #666;">URL</td>
+      <td style="padding: 6px 0;"><a href="{{ service.url }}">{{ service.url }}</a></td>
+    </tr>
+    <tr>
+      <td style="padding: 6px 0; color: #666;">Начало инцидента</td>
+      <td style="padding: 6px 0;">{{ incident.started_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 6px 0; color: #666;">Восстановление</td>
+      <td style="padding: 6px 0;">{{ incident.resolved_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 6px 0; color: #666;">Длительность</td>
+      <td style="padding: 6px 0;">
+        {% set duration = (incident.resolved_at - incident.started_at).total_seconds() | int %}
+        {{ duration // 60 }} мин {{ duration % 60 }} сек
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 6px 0; color: #666;">Инцидент</td>
+      <td style="padding: 6px 0;">#{{ incident.id }}</td>
+    </tr>
+  </table>
+
+  <p style="color: #666; font-size: 12px; border-top: 1px solid #eee; padding-top: 12px; margin-top: 24px;">
+    Письмо отправлено автоматически платформой мониторинга.
+    Вы получаете его, потому что включили email-уведомления.
+  </p>
+</body>
+</html>

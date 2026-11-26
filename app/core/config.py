@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     outbox_publisher_sleep_seconds: int = 5
     outbox_publisher_lock_ttl: int = 60
 
+    resend_api_key: str
+    email_from: str = "onboarding@resend.dev"
+    notification_queue: str = "notifications"
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"

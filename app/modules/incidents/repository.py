@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.modules.incidents.enums import IncidentStatus
 from app.modules.incidents.models import Incident
@@ -86,3 +87,15 @@ class IncidentRepository:
         result = await self._session.scalars(stmt)
 
         return result.first()
+
+    async def get_with_relations(self, incident_id: int) -> Incident | None:
+        """Инцидент с eager-loaded service и service.user (для consumer'а)."""
+
+        stmt = (
+            select(Incident)
+            .options(joinedload(Incident.service).joinedload(Service.user))
+            .where(Incident.id == incident_id)
+        )
+        result = await self._session.scalars(stmt)
+
+        return result.unique().first()
